@@ -37,7 +37,6 @@ export default function useClientGetData(
     }
 
     setData(options.single ? tableData?.[0] : tableData);
-    console.log(tableData);
   };
 
   useEffect(() => {

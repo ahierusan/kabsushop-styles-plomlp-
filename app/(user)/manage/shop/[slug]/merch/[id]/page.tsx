@@ -67,7 +67,6 @@ const Merch = () => {
   const handleAddCategory = (e) => {
     const newCategoryId = e.target.value;
     if (newCategoryId && !selectedCategories.includes(newCategoryId)) {
-      console.log(newCategoryId);
       setSelectedCategories((prev) => [...prev, newCategoryId]);
     }
     // Reset the select field after selection
@@ -152,7 +151,6 @@ const Merch = () => {
       // Upload variants
       for (let i = 0; i < variants.length; i++) {
         const variant_url = `variant_${name}_${i + 1}_${Date.now()}.png`;
-        console.log(variants[i].picture_url);
         if (variants[i].picture_url) {
           const { error: storageError } = await supabase.storage
             .from("variant-picture")
@@ -182,7 +180,6 @@ const Merch = () => {
               },
             ])
             .select();
-          console.log(data);
           if (merch_error) {
             throw merch_error;
           }
@@ -202,7 +199,6 @@ const Merch = () => {
           throw cat_error;
         }
       }
-      console.log("Successful!");
       router.push(`/manage/shop/${shopId}/merch/${id}`);
     } catch (error) {
       console.error(error.message);

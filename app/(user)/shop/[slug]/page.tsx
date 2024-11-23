@@ -153,7 +153,6 @@ const SearchPage = () => {
     });
 
     if (sort === "date") {
-      console.log(filteredResults);
       filteredResults.sort((a, b) => {
         return (
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
@@ -172,7 +171,6 @@ const SearchPage = () => {
         return priceB - priceA; // Ascending order
       });
     }
-    console.log(sort);
     if (error) {
       console.error(error);
     } else {

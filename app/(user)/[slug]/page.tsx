@@ -197,7 +197,7 @@ const Product = () => {
           .upload(url, paymentReceipt);
 
         if (storageError) {
-          console.log(storageError);
+          console.error(storageError);
         }
 
         const {
@@ -271,20 +271,6 @@ const Product = () => {
 
   return (
     <div className="">
-      {/* <Button
-        variant="outline"
-        onClick={() =>
-          toast("Event has been created", {
-            description: "Sunday, December 03, 2023 at 9:00 AM",
-            action: {
-              label: "Undo",
-              onClick: () => console.log("Undo"),
-            },
-          })
-        }
-      >
-        Show Toast
-      </Button> */}
       <div className="flex flex-col items-center p-5">
         <div className="space-y-4">
           <div className="flex gap-20">

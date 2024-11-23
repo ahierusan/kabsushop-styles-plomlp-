@@ -4,17 +4,8 @@ import Image from "next/image";
 import useClientGetData from "./useClientGetData";
 import { useEffect, useRef, useState } from "react";
 import { deleteCartOrder, handleOrderSubmit, updateCart } from "./functions";
-import ConfirmationModal from "@/components/ConfirmationModal";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { MdDelete } from "react-icons/md";
 import {
   Select,
@@ -28,406 +19,420 @@ import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { CodeSandboxLogoIcon } from "@radix-ui/react-icons";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+
+interface CartOrder {
+  id: number;
+  user_id: string;
+  quantity: number;
+  variant_id: number;
+  size_id: number | null;
+  merchandises: {
+    id: number;
+    name: string;
+    online_payment: boolean;
+    physical_payment: boolean;
+    receiving_information: string;
+    variants: {
+      id: number;
+      name: string;
+      picture_url: string;
+      original_price: number;
+      membership_price: number;
+      sizes?: {
+        id: number;
+        name: string;
+        original_price: number;
+        membership_price: number;
+      }[];
+    }[];
+  };
+  shops: {
+    id: number;
+    acronym: string;
+  };
+}
+
+interface PaymentOptions {
+  [key: string]: string;
+}
+
+interface PaymentReceipts {
+  [key: string]: File;
+}
 
 const Cart = () => {
   const [cartOrders, setCartOrders] = useClientGetData(
     "cart_orders",
     `
-        id,
-        user_id,
-        quantity,
-        variant_id,
-        merchandises(id, name, online_payment, physical_payment, receiving_information, variants(id, name, picture_url, original_price, membership_price, sizes(id, name, original_price, membership_price))),
-        shops!inner(id, acronym),
-        size_id`,
+      id,
+      user_id,
+      quantity,
+      variant_id,
+      merchandises(id, name, online_payment, physical_payment, receiving_information, variants(id, name, picture_url, original_price, membership_price, sizes(id, name, original_price, membership_price))),
+      shops!inner(id, acronym),
+      size_id
+    `,
     { con: { key: "user_id" } },
   );
-  console.log(cartOrders);
-  const [openConfirmation, setOpenConfirmation] = useState(false);
+
   const formRef = useRef<HTMLFormElement>(null);
-  const [selectedOrders, setSelectedOrders] = useState([]);
-  const [paymentOptions, setPaymentOptions] = useState<{
-    [key: string]: string;
-  }>({});
-  const [paymentReceipts, setPaymentReceipts] = useState<{
-    [key: string]: File;
-  }>({});
+  const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
+  const [paymentOptions, setPaymentOptions] = useState<PaymentOptions>({});
+  const [paymentReceipts, setPaymentReceipts] = useState<PaymentReceipts>({});
 
-  const handleVariantChange = (targetOrder, value) => {
-    console.log("variant", targetOrder.size_id);
-    setCartOrders((prevOrders) =>
-      prevOrders.map((order) =>
-        order.id == targetOrder.id
-          ? { ...order, variant_id: value, size_id: null }
-          : order,
-      ),
+  const handleVariantChange = (targetOrder: CartOrder, value: number) => {
+    setCartOrders(
+      (prevOrders) =>
+        prevOrders?.map((order) =>
+          order.id === targetOrder.id
+            ? { ...order, variant_id: value, size_id: null }
+            : order,
+        ) || [],
     );
   };
 
-  const handleSizeChange = (targetOrder, value: number) => {
-    console.log("size", targetOrder.size_id);
-    setCartOrders((prevOrders) =>
-      prevOrders.map((order) =>
-        order.id == targetOrder.id ? { ...order, size_id: value } : order,
-      ),
+  const handleSizeChange = (targetOrder: CartOrder, value: number) => {
+    setCartOrders(
+      (prevOrders) =>
+        prevOrders?.map((order) =>
+          order.id === targetOrder.id ? { ...order, size_id: value } : order,
+        ) || [],
     );
-    const o = targetOrder;
-    o.size_id = value;
-    updateCart(o);
+    updateCart({ ...targetOrder, size_id: value });
   };
 
-  const handleQuantityChange = (targetOrder, value: number) => {
-    setCartOrders((prevOrders) =>
-      prevOrders.map((order) =>
-        order.id == targetOrder.id ? { ...order, quantity: value } : order,
-      ),
+  const handleQuantityChange = (targetOrder: CartOrder, value: number) => {
+    if (value < 1) return;
+
+    setCartOrders(
+      (prevOrders) =>
+        prevOrders?.map((order) =>
+          order.id === targetOrder.id ? { ...order, quantity: value } : order,
+        ) || [],
     );
-    const o = targetOrder;
-    o.quantity = value;
-    updateCart(o);
+    updateCart({ ...targetOrder, quantity: value });
   };
 
-  const deleteOrder = (id: any) => {
-    setCartOrders((prevOrders) => prevOrders.filter((order) => order.id != id));
-  };
-
-  function getVariant(order, id) {
-    return order.merchandises.variants.find((variant) => variant.id == id);
-  }
-
-  function getSize(order, variant_id, size_id) {
-    return getVariant(order, variant_id).sizes.find(
-      (size) => size.id == size_id,
-    );
-  }
-
-  function deleteO(id) {
+  const deleteOrder = (id: number) => {
     deleteCartOrder(id);
-    deleteOrder(id);
-  }
+    setCartOrders(
+      (prevOrders) => prevOrders?.filter((order) => order.id !== id) || [],
+    );
+  };
 
-  // Handle checkbox changes
-  const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const orderId = event.target.value;
+  const getVariant = (order: CartOrder, variantId: number) => {
+    return order.merchandises.variants.find(
+      (variant) => variant.id === variantId,
+    );
+  };
+
+  const getSize = (order: CartOrder, variantId: number, sizeId: number) => {
+    const variant = getVariant(order, variantId);
+    return variant?.sizes?.find((size) => size.id === sizeId);
+  };
+
+  const handleCheckboxChange = (orderId: string) => {
     setSelectedOrders((prev) => {
-      if (event.target.checked) {
-        return [...prev, orderId];
-      } else {
-        return prev.filter((id) => id != orderId);
+      if (prev.includes(orderId)) {
+        return prev.filter((id) => id !== orderId);
       }
+      return [...prev, orderId];
     });
   };
 
-  // Get all form values
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
+  const handleSubmitOrders = () => {
+    if (!cartOrders) return;
 
-    if (!formRef.current) return;
+    selectedOrders.forEach((orderId) => {
+      const order = cartOrders.find((o) => o.id.toString() === orderId);
+      if (!order) return;
 
-    // Get selected orders
-    const formData = new FormData(formRef.current);
-    const selectedOrderIds = formData.getAll("orders");
-    const selectedOrdersDetails = cartOrders.filter((order) =>
-      selectedOrderIds.includes(order.id.toString()),
+      handleOrderSubmit(
+        order,
+        paymentOptions[orderId],
+        () => {},
+        paymentReceipts[orderId] || null,
+      );
+      deleteOrder(order.id);
+    });
+  };
+
+  const calculatePrice = (order: CartOrder) => {
+    const variant = getVariant(order, order.variant_id);
+    if (!variant) return 0;
+
+    if (order.size_id != null) {
+      const size = getSize(order, order.variant_id, order.size_id);
+      return (size?.original_price || 0) * order.quantity;
+    }
+    return variant.original_price * order.quantity;
+  };
+
+  if (!cartOrders || cartOrders.length === 0) {
+    return (
+      <div className="flex justify-center p-8">
+        <p className="text-lg">Your shopping cart is empty</p>
+      </div>
     );
-
-    // if (selectedOrderIds.some((order) => order.merchandises.sizes != null))
-    setSelectedOrders(selectedOrdersDetails);
-    setOpenConfirmation(!openConfirmation);
-    console.log("Selected Orders:", selectedOrdersDetails);
-  };
-
-  const handlePaymentOptionChange = (orderId: string, option: string) => {
-    setPaymentOptions((prev) => ({
-      ...prev,
-      [orderId]: option,
-    }));
-  };
-
-  const handlePaymentReceiptChange = (orderId: string, file: File) => {
-    setPaymentReceipts((prev) => ({
-      ...prev,
-      [orderId]: file,
-    }));
-  };
+  }
 
   return (
     <div className="flex flex-col items-center gap-4 p-4">
-      <div className="text-2xl font-bold text-emerald-800">
-        My Shopping Cart
-      </div>
-      <form
-        id="myForm"
-        ref={formRef}
-        className="flex w-1/2 flex-col gap-2"
-        onSubmit={handleSubmit}
-      >
-        {cartOrders ? (
-          cartOrders.map((order) => (
-            <label className="rounded-lg" key={order.id}>
-              <Card className="flex items-center justify-center p-3">
-                <div className="p-5">
-                  <input
-                    type="checkbox"
-                    name="orders"
-                    value={order.id}
-                    onChange={handleCheckboxChange}
-                    checked={selectedOrders.includes(order.id.toString())}
-                  />
-                </div>
+      <h1 className="text-2xl font-bold text-emerald-800">My Shopping Cart</h1>
 
-                <div className="flex flex-1 gap-2">
+      <form ref={formRef} className="w-full max-w-3xl space-y-4">
+        {cartOrders.map((order) => (
+          <Card key={order.id} className="overflow-hidden">
+            <CardContent className="flex items-center gap-4 p-4">
+              <input
+                type="checkbox"
+                className="h-5 w-5"
+                checked={selectedOrders.includes(order.id.toString())}
+                onChange={() => handleCheckboxChange(order.id.toString())}
+              />
+
+              <div className="flex flex-1 gap-4">
+                {getVariant(order, order.variant_id)?.picture_url && (
                   <Image
-                    src={getVariant(order, order.variant_id).picture_url}
-                    alt={""}
-                    width={50}
-                    height={50}
-                    className="h-28 w-28"
+                    src={getVariant(order, order.variant_id)!.picture_url}
+                    alt={order.merchandises.name}
+                    width={112}
+                    height={112}
+                    className="object-cover"
                   />
-                  <div className="flex flex-1 items-center justify-between gap-4">
-                    <div>
-                      <p className="text-lg font-semibold">
-                        {order.merchandises.name}
-                      </p>
-                      <div className="text-sm">{order.shops.acronym}</div>
-                      <div className="text-lg font-semibold text-emerald-800">
-                        $
-                        {order.size_id != null
-                          ? getSize(order, order.variant_id, order.size_id)
-                              ?.original_price * order.quantity
-                          : getVariant(order, order.variant_id).original_price *
-                            order.quantity}
-                      </div>
+                )}
+
+                <div className="flex flex-1 flex-col gap-2">
+                  <div>
+                    <h3 className="text-lg font-semibold">
+                      {order.merchandises.name}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      {order.shops.acronym}
+                    </p>
+                    <p className="text-lg font-semibold text-emerald-800">
+                      ${calculatePrice(order).toFixed(2)}
+                    </p>
+                  </div>
+
+                  <div className="flex gap-4">
+                    <div className="space-y-2">
+                      <Label>Variant</Label>
+                      <Select
+                        value={order.variant_id?.toString()}
+                        onValueChange={(val) =>
+                          handleVariantChange(order, parseInt(val))
+                        }
+                      >
+                        <SelectTrigger className="w-[120px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {order.merchandises.variants.map((variant) => (
+                            <SelectItem
+                              key={variant.id}
+                              value={variant.id.toString()}
+                            >
+                              {variant.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
-                    <div className="flex gap-5">
-                      <div>
-                        <Label htmlFor="variant">Variant</Label>
+
+                    {getVariant(order, order.variant_id)?.sizes && (
+                      <div className="space-y-2">
+                        <Label>Size</Label>
                         <Select
-                          value={order.variant_id?.toString()}
-                          onValueChange={(val) => {
-                            handleVariantChange(order, parseInt(val));
-                          }}
-                          required
+                          value={order.size_id?.toString()}
+                          onValueChange={(val) =>
+                            handleSizeChange(order, parseInt(val))
+                          }
                         >
-                          <SelectTrigger className="w-[100px]">
+                          <SelectTrigger className="w-[120px]">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {order.merchandises.variants.map((variant) => (
-                              <SelectItem
-                                value={`${variant.id}`}
-                                key={variant.id}
-                              >
-                                {variant.name}
-                              </SelectItem>
-                            ))}
+                            {getVariant(order, order.variant_id)?.sizes?.map(
+                              (size) => (
+                                <SelectItem
+                                  key={size.id}
+                                  value={size.id.toString()}
+                                >
+                                  {size.name}
+                                </SelectItem>
+                              ),
+                            )}
                           </SelectContent>
                         </Select>
                       </div>
-                      {order.merchandises.variants[0].sizes && (
-                        <div>
-                          <Label htmlFor="sizes">Size</Label>
-                          <Select
-                            value={order.size_id?.toString()}
-                            onValueChange={(val) => {
-                              handleSizeChange(order, parseInt(val));
-                            }}
-                            required
-                          >
-                            <SelectTrigger className="w-[100px]">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {getVariant(order, order.variant_id).sizes.map(
-                                (size) => (
-                                  <SelectItem
-                                    key={size.id}
-                                    value={`${size.id}`}
-                                  >
-                                    {size.name}
-                                  </SelectItem>
-                                ),
-                              )}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      )}
-                      <div className="grid w-[100px] items-center gap-1.5">
-                        <Label htmlFor="quantity">Quantity</Label>
-                        <Input
-                          id="quantity"
-                          type="number"
-                          min="1"
-                          value={order.quantity}
-                          onChange={(e) => {
-                            handleQuantityChange(
-                              order,
-                              parseInt(e.target.value),
-                            );
-                          }}
-                          required
-                        />
-                      </div>
+                    )}
+
+                    <div className="space-y-2">
+                      <Label>Quantity</Label>
+                      <Input
+                        type="number"
+                        min="1"
+                        value={order.quantity}
+                        onChange={(e) =>
+                          handleQuantityChange(order, parseInt(e.target.value))
+                        }
+                        className="w-[120px]"
+                      />
                     </div>
                   </div>
-                  <div className="flex items-center">
-                    <Button
-                      type="button"
-                      onClick={() => {
-                        deleteO(order.id);
-                      }}
-                      variant="destructive"
-                      size="icon"
-                    >
-                      <MdDelete color="white" />
-                    </Button>
-                  </div>
                 </div>
-              </Card>
-            </label>
-          ))
-        ) : (
-          <div>No Cart orders yet</div>
-        )}
 
-        {/* Add submit button if you want to process all selected orders */}
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  onClick={() => deleteOrder(order.id)}
+                >
+                  <MdDelete className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
 
         <Dialog>
           <DialogTrigger asChild>
-            <Button type="button" disabled={selectedOrders.length == 0}>
-              Process Selected Orders
+            <Button className="w-full" disabled={selectedOrders.length === 0}>
+              Checkout ({selectedOrders.length} items)
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-h-[80vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Confirm purchase</DialogTitle>
+              <DialogTitle>Confirm Purchase</DialogTitle>
             </DialogHeader>
-            <div className="flex flex-col gap-5">
-              {selectedOrders &&
-                selectedOrders.map((o) => {
-                  const order = cartOrders.find((or) => or.id == o);
-                  return (
-                    <div key={order.id} className="flex gap-5">
-                      <div>
-                        <Image
-                          src={getVariant(order, order.variant_id).picture_url}
-                          alt={""}
-                          width={100}
-                          height={100}
-                        />
-                      </div>
-                      <div>
-                        <div className="font-semibold">
+
+            <div className="space-y-6">
+              {selectedOrders.map((orderId) => {
+                const order = cartOrders.find(
+                  (o) => o.id.toString() === orderId,
+                );
+                if (!order) return null;
+
+                const variant = getVariant(order, order.variant_id);
+                if (!variant) return null;
+
+                return (
+                  <div key={order.id} className="space-y-4 border-b pb-4">
+                    <div className="flex gap-4">
+                      <Image
+                        src={variant.picture_url}
+                        alt={order.merchandises.name}
+                        width={100}
+                        height={100}
+                        className="object-cover"
+                      />
+
+                      <div className="flex-1">
+                        <h3 className="font-semibold">
                           {order.merchandises.name}
-                        </div>
-                        <div>
-                          <span className="font-semibold">Variant: </span>
-                          {getVariant(order, order.variant_id).name}
-                        </div>
-                        <div>
-                          <span className="font-semibold">Quantity:</span>
-                          {order.quantity}
-                        </div>
-                        <div>
-                          <span className="font-semibold">Price: </span>P
-                          {order.size_id != null
-                            ? getSize(order, order.variant_id, order.size_id)
-                                ?.original_price * order.quantity
-                            : getVariant(order, order.variant_id)
-                                .original_price * order.quantity}
-                        </div>
+                        </h3>
+                        <p>Variant: {variant.name}</p>
+                        <p>Quantity: {order.quantity}</p>
+                        <p className="font-semibold">
+                          Price: ${calculatePrice(order).toFixed(2)}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {order.merchandises.receiving_information}
+                        </p>
                       </div>
-                      <div>
-                        <span className="font-semibold">
-                          Receiving information:{" "}
-                        </span>
-                        {order.merchandises.receiving_information}
-                      </div>
-                      <form className="space-y-2">
-                        {order.merchandises.physical_payment && (
-                          <label className="block">
-                            <input
-                              type="radio"
-                              name={`payment-${order.id}`}
-                              value="irl"
-                              checked={paymentOptions[order.id] == "irl"}
-                              onChange={() =>
-                                handlePaymentOptionChange(order.id, "irl")
-                              }
-                            />
-                            <span className="ml-2">In-Person Payment</span>
-                          </label>
-                        )}
-                        {order.merchandises.online_payment && (
-                          <label className="block">
-                            <input
-                              type="radio"
-                              name={`payment-${order.id}`}
-                              value="online"
-                              checked={paymentOptions[order.id] == "online"}
-                              onChange={() =>
-                                handlePaymentOptionChange(order.id, "online")
-                              }
-                            />
-                            <span className="ml-2">Online Payment</span>
-                          </label>
-                        )}
-                        {paymentOptions[order.id] == "online" && (
-                          <div className="mt-2">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                  handlePaymentReceiptChange(order.id, file);
-                                }
-                              }}
-                              required
-                            />
-                            {paymentReceipts[order.id] && (
-                              <div className="mt-2">
-                                <h4>Image Preview:</h4>
-                                <Image
-                                  src={URL.createObjectURL(
-                                    paymentReceipts[order.id],
-                                  )}
-                                  alt="Selected"
-                                  width={50}
-                                  height={50}
-                                />
-                              </div>
-                            )}
-                          </div>
-                        )}
-                        <Button
-                          onClick={() =>
-                            selectedOrders.map((order) => {
-                              handleOrderSubmit(
-                                order,
-                                paymentOptions[order.id],
-                                setOpenConfirmation,
-                                paymentReceipts[order.id]
-                                  ? paymentReceipts[order.id]
-                                  : null,
-                              );
-                              deleteO(order.id);
-                            })
-                          }
-                        >
-                          Submit
-                        </Button>
-                      </form>
                     </div>
-                  );
-                })}
+
+                    <div className="space-y-4">
+                      {order.merchandises.physical_payment && (
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name={`payment-${order.id}`}
+                            value="irl"
+                            checked={paymentOptions[order.id] === "irl"}
+                            onChange={() =>
+                              setPaymentOptions((prev) => ({
+                                ...prev,
+                                [order.id]: "irl",
+                              }))
+                            }
+                          />
+                          In-Person Payment
+                        </label>
+                      )}
+
+                      {order.merchandises.online_payment && (
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name={`payment-${order.id}`}
+                            value="online"
+                            checked={paymentOptions[order.id] === "online"}
+                            onChange={() =>
+                              setPaymentOptions((prev) => ({
+                                ...prev,
+                                [order.id]: "online",
+                              }))
+                            }
+                          />
+                          Online Payment
+                        </label>
+                      )}
+
+                      {paymentOptions[order.id] === "online" && (
+                        <div className="space-y-2">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                setPaymentReceipts((prev) => ({
+                                  ...prev,
+                                  [order.id]: file,
+                                }));
+                              }
+                            }}
+                            required
+                          />
+
+                          {paymentReceipts[order.id] && (
+                            <div className="mt-2">
+                              <p className="text-sm font-medium">Preview:</p>
+                              <Image
+                                src={URL.createObjectURL(
+                                  paymentReceipts[order.id],
+                                )}
+                                alt="Receipt"
+                                width={100}
+                                height={100}
+                                className="object-cover"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+
+              <Button
+                className="w-full"
+                onClick={handleSubmitOrders}
+                disabled={selectedOrders.some(
+                  (orderId) =>
+                    !paymentOptions[orderId] ||
+                    (paymentOptions[orderId] === "online" &&
+                      !paymentReceipts[orderId]),
+                )}
+              >
+                Complete Purchase
+              </Button>
             </div>
           </DialogContent>
         </Dialog>

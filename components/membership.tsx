@@ -68,7 +68,6 @@ const Membership = () => {
           .from("membership_requests")
           .insert([{ user_id: user.id, shop_id: selectedShop }]);
       }
-      console.log(selectError);
     };
     insertData();
   }

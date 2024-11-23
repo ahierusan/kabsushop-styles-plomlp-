@@ -99,7 +99,7 @@ export function handleOrderSubmit(
         .upload(url, paymentReceipt);
 
       if (storageError) {
-        console.log(storageError);
+        console.error(storageError);
       }
 
       const {
