@@ -244,7 +244,8 @@ const Cart = () => {
                       </Select>
                     </div>
 
-                    {getVariant(order, order.variant_id)?.sizes && (
+                    {getVariant(order, order.variant_id)?.sizes?.length !=
+                      0 && (
                       <div className="space-y-2">
                         <Label>Size</Label>
                         <Select

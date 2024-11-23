@@ -25,6 +25,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import NewProfile from "@/components/new-profile";
 import Membership from "@/components/membership";
 import ManagedShops from "@/components/managed-shops";
+import Orders from "@/components/orders";
 
 type Shop = {
   id: number;
@@ -40,6 +41,7 @@ const UserPage = () => {
             <TabsTrigger value="profile">Profile Information</TabsTrigger>
             <TabsTrigger value="membership">Membership Request</TabsTrigger>
             <TabsTrigger value="shops">Manage Shops</TabsTrigger>
+            <TabsTrigger value="orders">View Orders</TabsTrigger>
           </TabsList>
         </div>
         <Card className="">
@@ -52,6 +54,9 @@ const UserPage = () => {
             </TabsContent>
             <TabsContent value="shops">
               <ManagedShops />
+            </TabsContent>
+            <TabsContent value="orders">
+              <Orders />
             </TabsContent>
           </CardContent>
         </Card>

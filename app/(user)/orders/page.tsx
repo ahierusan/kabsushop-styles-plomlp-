@@ -1,4 +1,4 @@
-import { createServerClient } from "@/supabase/clients/createClients";
+import { createServerClient } from "@/supabase/clients/createServer";
 import React from "react";
 import OrderCard from "@/components/order-card";
 
