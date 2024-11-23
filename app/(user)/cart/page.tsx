@@ -294,7 +294,7 @@ const Cart = () => {
             </label>
           ))
         ) : (
-          <div>No Cart orders yet. Get to ordering pus!</div>
+          <div>No Cart orders yet</div>
         )}
 
         {/* Add submit button if you want to process all selected orders */}
