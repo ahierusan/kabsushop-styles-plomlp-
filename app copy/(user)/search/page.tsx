@@ -190,8 +190,6 @@ const SearchPage = () => {
       ? selectedCategories.filter((id) => id !== categoryId)
       : [...selectedCategories, categoryId];
 
-    setSelectedCategories(updatedSelected);
-
     // Update the URL with the new search parameters
     const queryParams = new URLSearchParams(window.location.search);
     queryParams.set("category", updatedSelected.join(",")); // Set the 'category' param to the selected IDs
@@ -203,8 +201,6 @@ const SearchPage = () => {
     const updatedSelected = selectedShops.includes(shopId)
       ? selectedShops.filter((id) => id !== shopId)
       : [...selectedShops, shopId];
-
-    setSelectedShops(updatedSelected);
 
     // Update the URL with the new search parameters
     const queryParams = new URLSearchParams(window.location.search);

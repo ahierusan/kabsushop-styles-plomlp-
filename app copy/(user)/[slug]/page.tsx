@@ -466,38 +466,8 @@ const Product = () => {
                   {"In-Person Payment"}
                 </label>
               )}
-              {/* {merch.online_payment && (
-                <label className="block">
-                  <input
-                    type="radio"
-                    value={"online"}
-                    checked={paymentOption === "online"}
-                    onChange={() => setPaymentOption("online")}
-                  />
-                  {"Online Payment"}
-                </label>
-              )} */}
               {paymentOption == "online" && (
                 <div className="grid w-full items-center gap-1.5">
-                  {/* <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) =>
-                      setPaymentReceipt(e.target.files?.[0] || null)
-                    }
-                    required
-                  /> */}
-                  {/* {paymentReceipt && (
-                    <div>
-                      <h4>Image Preview:</h4>
-                      <Image
-                        src={URL.createObjectURL(paymentReceipt)}
-                        alt="Selected"
-                        width={50}
-                        height={50}
-                      />
-                    </div>
-                  )} */}
                   <Label htmlFor="picture" className="font-semibold">
                     GCash Receipt
                   </Label>
@@ -517,88 +487,6 @@ const Product = () => {
           </DialogHeader>
         </DialogContent>
       </Dialog>
-
-      {/* {openConfirmation && (
-        <ConfirmationModal
-          isOpen={openConfirmation}
-          handleClose={() => setOpenConfirmation(!openConfirmation)}
-        >
-          <div className="flex gap-5">
-            <Image
-              src={getVariant().picture_url}
-              alt={""}
-              width={50}
-              height={50}
-            />
-            <div>{merch.name}</div>
-            <div>Variant: {getVariant().name}</div>
-            <div>Quantity: {quantity}</div>
-            <div>
-              Price: P
-              {selectedSize
-                ? getSize().original_price * quantity
-                : getVariant().original_price * quantity}
-            </div>
-          </div>
-          <div>{merch.receiving_information}</div>
-          <form action="">
-            {merch.physical_payment && (
-              <label className="block">
-                <input
-                  type="radio"
-                  value={"irl"}
-                  checked={paymentOption === "irl"}
-                  onChange={() => setPaymentOption("irl")}
-                />
-                {"In-Person Payment"}
-              </label>
-            )}
-            {merch.online_payment && (
-              <label className="block">
-                <input
-                  type="radio"
-                  value={"online"}
-                  checked={paymentOption === "online"}
-                  onChange={() => setPaymentOption("online")}
-                />
-                {"Online Payment"}
-              </label>
-            )}
-            {paymentOption == "online" && (
-              <div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) =>
-                    setPaymentReceipt(e.target.files?.[0] || null)
-                  }
-                  required
-                />
-                {paymentReceipt && (
-                  <div>
-                    <h4>Image Preview:</h4>
-                    <Image
-                      src={URL.createObjectURL(paymentReceipt)}
-                      alt="Selected"
-                      width={50}
-                      height={50}
-                    />
-                  </div>
-                )}
-              </div>
-            )}
-          </form>
-          <button onClick={handleOrderSubmit}>Confirm</button>
-        </ConfirmationModal>
-      )} */}
-      {/* {cartConfirmation && (
-        <ConfirmationModal
-          isOpen={cartConfirmation}
-          handleClose={() => setCartConfirmation(!cartConfirmation)}
-        >
-          <div>Added to cart successfully!</div>
-        </ConfirmationModal>
-      )} */}
     </div>
   );
 };

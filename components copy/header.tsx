@@ -119,7 +119,7 @@ const Header = () => {
   };
 
   return (
-    <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-zinc-200 bg-zinc-50 px-28">
+    <header className="sticky top-0 flex h-16 items-center justify-between border-b border-zinc-200 bg-zinc-50 px-28">
       <div>
         <Link href={"/"} className="font-bold text-emerald-800">
           The Kabsu Shop
@@ -153,6 +153,8 @@ const Header = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
+              <DropdownMenuLabel>Organizations</DropdownMenuLabel>
+              <DropdownMenuSeparator />
               {shops?.map((shop) => (
                 <DropdownMenuItem
                   key={shop.id}
@@ -163,6 +165,12 @@ const Header = () => {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+          <Button variant="link">
+            <Link href={"/about"}>About</Link>
+          </Button>
+          <Button variant="link">
+            <Link href={"/contact"}>Contact</Link>
+          </Button>
         </ul>
         <form className="relative" onSubmit={handleSubmit}>
           <button className="absolute left-2 top-2.5" type="submit">
