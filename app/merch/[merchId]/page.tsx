@@ -6,7 +6,7 @@ import FullMerchDisplay from "@/components/merch-display";
 const MerchandisePage = async ({ params }: { params: { merchId: string } }) => {
   const merchId = params.merchId;
   const supabase = createServerClient();
-  let { data: merch, error: merchandiseError } = await supabase
+  let { data: merch, error: merchandiseError } = (await supabase
     .from("merchandises")
     .select(
       `
@@ -19,13 +19,12 @@ const MerchandisePage = async ({ params }: { params: { merchId: string } }) => {
         merchandise_pictures(id, picture_url), 
         variant_name,
         variants(id, name, picture_url, original_price, membership_price), 
-        shops!inner(id, name, logo_url, acronym)
+        shops(id, name, logo_url, acronym)
         `,
     )
     .eq("id", merchId)
-    .returns<FullMerch>()
-    .single();
-  if (merchandiseError) {
+    .single()) as { data: FullMerch | null; error: any };
+  if (merchandiseError || !merch) {
     return <p>No merch found!</p>;
   }
 
@@ -41,7 +40,7 @@ const MerchandisePage = async ({ params }: { params: { merchId: string } }) => {
     .from("memberships")
     .select()
     .eq("user_id", user?.id)
-    .eq("shop_id", merch?.shops?.id);
+    .eq("shop_id", merch?.shops.id);
 
   return (
     <>

@@ -14,7 +14,7 @@ import {
 import { toast } from "sonner";
 import { FullMerch } from "@/constants/type";
 import MerchPictureDisplay from "./merch-pictures-display";
-import ShopCard from "./shop-card";
+import ShopCard from "./merch-shop-card";
 import ConfirmOrderDialog from "./confirm-order";
 import { createClient } from "@/supabase/clients/createClient";
 
@@ -109,6 +109,9 @@ const FullMerchDisplay = ({
             merch_id: merch.id,
             shop_id: merch.shops.id,
             status_id: status_id,
+            price: membership
+              ? quantity * merch.variants[selectedVariant].membership_price
+              : quantity * merch.variants[selectedVariant].original_price,
           },
         ])
         .select()

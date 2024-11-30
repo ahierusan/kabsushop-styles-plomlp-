@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import OrderCard from "@/components/order-card";
+import OrderCard from "@/components copy/order-card";
 import { createClient } from "@/supabase/clients/createClient";
 
 const Orders = () => {

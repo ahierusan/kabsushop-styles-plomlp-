@@ -1,31 +1,10 @@
-"use client";
-
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import React, { useEffect, useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
+import React from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import NewProfile from "@/components/new-profile";
 import Membership from "@/components/membership";
-import ManagedShops from "@/components/managed-shops";
-import Orders from "@/components copy/orders";
+import ManageShops from "@/components/managed-shop";
+import Orders from "@/components/orders";
 
 type Shop = {
   id: number;
@@ -53,7 +32,7 @@ const UserPage = () => {
               <Membership />
             </TabsContent>
             <TabsContent value="shops">
-              <ManagedShops />
+              <ManageShops />
             </TabsContent>
             <TabsContent value="orders">
               <Orders />

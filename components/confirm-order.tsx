@@ -68,7 +68,7 @@ const ConfirmOrderDialog = ({
             {merch.receiving_information}
           </p>
 
-          <div className="space-y-2">
+          <div className="flex flex-col space-y-2">
             {merch.physical_payment && (
               <label className="inline-flex items-center">
                 <input
