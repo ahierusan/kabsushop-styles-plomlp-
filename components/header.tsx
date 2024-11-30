@@ -39,7 +39,7 @@ const Header = () => {
   const [query, setQuery] = useState("");
   const path = usePathname();
   const params = useParams();
-  const shopId = params.slug;
+  const shopId = params.slug ?? params.shopId;
   const router = useRouter();
 
   useEffect(() => {

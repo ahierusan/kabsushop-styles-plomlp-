@@ -76,8 +76,8 @@ export type Profile = {
 
 export type Shop = {
   id: number;
-  name: string;
-  acronym: string;
+  name?: string;
+  acronym?: string;
 };
 
 export type ManagedShop = {
@@ -113,4 +113,17 @@ export type Order = {
     name: string;
     acronym: string;
   };
+};
+
+export type FullShopInfo = {
+  id: number;
+  name: string;
+  email: string;
+  socmed_url: string;
+  logo_url: string;
+  colleges: {
+    id: string;
+    name: string;
+  };
+  acronym: string;
 };

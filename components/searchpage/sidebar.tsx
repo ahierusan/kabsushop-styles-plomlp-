@@ -7,17 +7,15 @@ const SearchSidebar = ({
   selectedCategories,
   categories,
   shops,
-  handleShopChange,
   selectedShops,
-  inShop,
+  handleShopChange,
 }: {
   handleCategoryChange: (categoryId: number) => void;
   selectedCategories: number[];
   categories: Category[];
-  shops: Shop[];
-  handleShopChange: (shopId: number) => void;
+  shops?: Shop[];
+  handleShopChange?: (shopId: number) => void;
   selectedShops: number[];
-  inShop: boolean;
 }) => {
   return (
     <aside className="border-r border-zinc-200 pr-32 pt-4">
@@ -43,7 +41,7 @@ const SearchSidebar = ({
             ))}
           </div>
         </div>
-        {!inShop && (
+        {handleShopChange != null && (
           <div>
             <p className="pb-2 font-semibold">Shops</p>
             <div className="flex flex-col gap-2 text-sm">

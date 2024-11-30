@@ -16,13 +16,15 @@ const ResultsDisplay = ({
   setSort,
   query,
   results,
+  inShop,
 }: {
   setSort: React.Dispatch<React.SetStateAction<string>>;
   query: string;
   results: Merch[];
+  inShop?: boolean;
 }) => {
   return (
-    <div className="flex-1 space-y-2 px-6 py-2">
+    <div className={`${!inShop && "px-6"} flex-1 space-y-2 py-2`}>
       <div className="flex items-center gap-2">
         <Select onValueChange={(val) => setSort(val)}>
           <SelectTrigger className="w-[180px]">

@@ -1,32 +1,35 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import {
+  useParams,
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
 import { createClient } from "@/supabase/clients/createClient";
-import { Merch, Shop, Category } from "@/constants/type";
+import { Merch, Shop, Category, FullShopInfo } from "@/constants/type";
 import SearchSidebar from "@/components/searchpage/sidebar";
 import ResultsDisplay from "@/components/searchpage/results";
+import ShopDisplay from "@/components/shop-display";
 
 const SearchPage = () => {
   const supabase = createClient();
   const searchParams = useSearchParams();
   const router = useRouter();
+  const params = useParams();
+  const shopId = params.shopId;
   const [sort, setSort] = useState("date");
   const categoryParam = searchParams.get("category");
   const query = searchParams.get("query");
-  const shopParam = searchParams.get("shop");
   const [merchandises, setMerchandises] = useState<Merch[]>([]);
   const [results, setResults] = useState<Merch[]>([]);
-  const [shops, setShops] = useState<Shop[]>([]);
+  const [shop, setShop] = useState<FullShopInfo | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedShops, setSelectedShops] = useState<number[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
 
-  const filterMerchandises = (
-    query: string,
-    categories: number[],
-    shops: number[],
-  ) => {
+  const filterMerchandises = (query: string, categories: number[]) => {
     let filteredResults: Merch[];
     if (merchandises == null) {
       filteredResults = [];
@@ -46,12 +49,9 @@ const SearchPage = () => {
       });
     }
 
-    if (shops.length > 0) {
-      // Filter the data to only include items that belong to selected shops
-      filteredResults = filteredResults.filter((item) => {
-        return shops.includes(item.shops?.id);
-      });
-    }
+    filteredResults = filteredResults.filter((item) => {
+      return item.shops.id.toString() == shopId.toString();
+    });
 
     if (sort === "date") {
       filteredResults.sort((a, b) => {
@@ -106,8 +106,16 @@ const SearchPage = () => {
 
     // Fetch shops
     const getShops = async () => {
-      const { data } = await supabase.from("shops").select("id, acronym");
-      setShops(data ?? []);
+      const { data, error } = await supabase
+        .from("shops")
+        .select(
+          "id, name, email, socmed_url, logo_url, colleges(id, name), acronym",
+        )
+        .eq("id", shopId)
+        .returns<FullShopInfo>()
+        .single();
+      console.log(error);
+      setShop(data);
     };
     getShops();
   }, []);
@@ -116,28 +124,18 @@ const SearchPage = () => {
     if (merchandises.length === 0) return; // Skip filtering if no data
 
     let categoryIds: number[] = [];
-    let shopIds: number[] = [];
     if (categoryParam) {
       categoryIds = categoryParam.split(",").map(Number);
       setSelectedCategories(categoryIds); // Set selected categories from URL param
     }
 
-    if (shopParam) {
-      shopIds = shopParam.split(",").map(Number);
-      setSelectedShops(shopIds); // Set selected shops from URL param
-    }
-
-    if (categoryParam && shopParam) {
-      filterMerchandises(query ?? "", categoryIds, shopIds);
-    } else if (categoryParam) {
-      filterMerchandises(query ?? "", categoryIds, selectedShops);
-    } else if (shopParam) {
-      filterMerchandises(query ?? "", selectedCategories, shopIds);
+    if (categoryParam) {
+      filterMerchandises(query ?? "", categoryIds);
     } else {
-      filterMerchandises(query ?? "", selectedCategories, selectedShops);
+      filterMerchandises(query ?? "", selectedCategories);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [merchandises, query, categoryParam, shopParam, sort]);
+  }, [merchandises, query, categoryParam, sort]);
 
   // Handle category change
   const handleCategoryChange = (categoryId: number): void => {
@@ -149,44 +147,28 @@ const SearchPage = () => {
     // Update the URL with the new search parameters
     const queryParams = new URLSearchParams(window.location.search);
     queryParams.set("category", updatedSelected.join(",")); // Set the 'category' param to the selected IDs
-    router.push(`/search?${queryParams.toString()}`); // Update the URL without reloading
+    router.push(`/shop/${shopId}?${queryParams.toString()}`); // Update the URL without reloading
   };
-
-  // Handle shop change
-  const handleShopChange = (shopId: number): void => {
-    const updatedSelected = selectedShops.includes(shopId)
-      ? selectedShops.filter((id) => id !== shopId)
-      : [...selectedShops, shopId];
-
-    setSelectedShops(updatedSelected);
-    // Update the URL with the new search parameters
-    const queryParams = new URLSearchParams(window.location.search);
-    queryParams.set("shop", updatedSelected.join(",")); // Set the 'shop' param to the selected IDs
-    router.push(`/search?${queryParams.toString()}`); // Update the URL without reloading
-  };
-
-  const inShopPage = (): boolean => {
-    const currentUrl = usePathname();
-    return currentUrl.startsWith(`${process.env.NEXT_PUBLIC_BASE_URL}/shop`);
-  };
-
+  console.log(shop);
   return (
     <div className="flex justify-center">
       <div className="flex px-28 text-sm">
         <SearchSidebar
           handleCategoryChange={handleCategoryChange}
-          handleShopChange={handleShopChange}
-          shops={shops}
           categories={categories}
           selectedCategories={selectedCategories}
           selectedShops={selectedShops}
         />
 
-        <ResultsDisplay
-          setSort={setSort}
-          query={query ?? ""}
-          results={results}
-        />
+        <div className="flex flex-1 flex-col space-y-2 px-6 py-2">
+          <ShopDisplay shop={shop} />
+          <ResultsDisplay
+            setSort={setSort}
+            query={query ?? ""}
+            results={results}
+            inShop={true}
+          />
+        </div>
       </div>
     </div>
   );
