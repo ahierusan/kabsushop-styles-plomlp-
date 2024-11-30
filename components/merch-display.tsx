@@ -14,7 +14,7 @@ import {
 import { toast } from "sonner";
 import { FullMerch } from "@/constants/type";
 import MerchPictureDisplay from "./merch-pictures-display";
-import ShopCard from "./merch-shop-card";
+import ShopCard from "./shop-card";
 import ConfirmOrderDialog from "./confirm-order";
 import { createClient } from "@/supabase/clients/createClient";
 
@@ -256,7 +256,7 @@ const FullMerchDisplay = ({
             </div>
           </form>
 
-          <ShopCard merch={merch} />
+          <ShopCard shop={merch.shops} />
 
           <div>
             <h2 className="mb-2 text-xl font-semibold">Description</h2>

@@ -15,7 +15,7 @@ const Orders = async () => {
     )
     .eq("user_id", user?.id)
     .returns<Order[]>();
-  console.log(error);
+
   return (
     <div className="flex flex-col items-center gap-4 p-4">
       <div className="text-2xl font-bold text-emerald-800">My Orders</div>
