@@ -7,6 +7,8 @@ import { Checkbox } from "./ui/checkbox";
 import Image from "next/image";
 import OrderInfo from "./order-info";
 import { createClient } from "@/supabase/clients/createClient";
+import { Dialog, DialogTrigger } from "./ui/dialog";
+import { Button } from "./ui/button";
 
 const CartOrderDisplay = ({
   order,
@@ -56,8 +58,6 @@ const CartOrderDisplay = ({
         />
 
         <OrderInfo order={order} status={status} setCart={setCart} />
-
-        
       </CardContent>
     </Card>
   );

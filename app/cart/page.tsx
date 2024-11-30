@@ -1,6 +1,15 @@
 "use client";
 
+import CartOrderConfirmCard from "@/components/cart-order-confirm";
 import CartOrderDisplay from "@/components/cart-orders";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { CartOrder } from "@/constants/type";
 import { createClient } from "@/supabase/clients/createClient";
 import React, { useEffect, useState } from "react";
@@ -49,15 +58,45 @@ const Cart = () => {
 
       <form className="w-full max-w-3xl space-y-4">
         {cart ? (
-          cart.map((item) => (
-            <CartOrderDisplay
-              key={item.id}
-              order={item}
-              selectedOrders={selectedOrders}
-              handleCheckboxChange={handleCheckboxChange}
-              setCart={setCart}
-            />
-          ))
+          <div>
+            {cart.map((item) => (
+              <CartOrderDisplay
+                key={item.id}
+                order={item}
+                selectedOrders={selectedOrders}
+                handleCheckboxChange={handleCheckboxChange}
+                setCart={setCart}
+              />
+            ))}
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button
+                  className="w-full"
+                  disabled={selectedOrders.length === 0}
+                >
+                  Checkout ({selectedOrders.length} items)
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Confirm Purchase</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-6">
+                  {selectedOrders?.map((id) => {
+                    const order = cart.find((o) => o.id.toString() === id);
+                    return (
+                      <CartOrderConfirmCard
+                        order={order}
+                        handleOrderSubmit={() => {
+                          return;
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
         ) : (
           <div>No cart orders found!</div>
         )}
