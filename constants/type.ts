@@ -127,3 +127,31 @@ export type FullShopInfo = {
   };
   acronym: string;
 };
+
+export type CartOrder = {
+  id: number;
+  user_id: string;
+  quantity: number;
+  variant_id: number;
+  merchandises: {
+    id: number;
+    name: string;
+    online_payment: boolean;
+    physical_payment: boolean;
+    receiving_information: string;
+    variant_name: string;
+    merchandise_pictures: {
+      picture_url: string;
+    }[];
+    variants: {
+      id: number;
+      name: string;
+      original_price: number;
+      membership_price: number;
+    }[];
+  };
+  shops: {
+    id: number;
+    acronym: string;
+  };
+};

@@ -244,35 +244,6 @@ const Cart = () => {
                       </Select>
                     </div>
 
-                    {getVariant(order, order.variant_id)?.sizes?.length !=
-                      0 && (
-                      <div className="space-y-2">
-                        <Label>Size</Label>
-                        <Select
-                          value={order.size_id?.toString()}
-                          onValueChange={(val) =>
-                            handleSizeChange(order, parseInt(val))
-                          }
-                        >
-                          <SelectTrigger className="w-[120px]">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {getVariant(order, order.variant_id)?.sizes?.map(
-                              (size) => (
-                                <SelectItem
-                                  key={size.id}
-                                  value={size.id.toString()}
-                                >
-                                  {size.name}
-                                </SelectItem>
-                              ),
-                            )}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
-
                     <div className="space-y-2">
                       <Label>Quantity</Label>
                       <Input
