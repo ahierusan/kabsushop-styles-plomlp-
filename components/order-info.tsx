@@ -140,7 +140,7 @@ const OrderInfo = ({
                 });
               }}
             >
-              <SelectTrigger className="w-[120px]">
+              <SelectTrigger className="w-[240px]">
                 <SelectValue
                   placeholder={`Enter ${order.merchandises.variant_name}...`}
                 />
@@ -174,7 +174,7 @@ const OrderInfo = ({
                 });
               }}
               min="1"
-              className="w-[120px]"
+              className="w-[240px]"
             />
           </div>
         </div>

@@ -153,5 +153,6 @@ export type CartOrder = {
   shops: {
     id: number;
     acronym: string;
+    logo_url: string;
   };
 };

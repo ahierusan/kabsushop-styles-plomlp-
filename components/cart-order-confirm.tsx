@@ -11,14 +11,18 @@ import { createClient } from "@/supabase/clients/createClient";
 
 const CartOrderConfirmCard = ({
   order,
-  handleOrderSubmit,
+  paymentUpdate,
 }: {
   order: CartOrder;
-  handleOrderSubmit: () => void;
+  paymentUpdate: (
+    orderId: string,
+    paymentOption: string,
+    paymentReceipt?: File,
+  ) => void;
 }) => {
-  const [paymentOption, setPaymentOption] = useState<string>("");
-  const [paymentReceipt, setPaymentReceipt] = useState<File | null>(null);
   const [membership, setMembership] = useState<boolean>(false);
+  const [paymentOption, setPaymentOption] = useState<string>("none");
+  const [paymentReceipt, setPaymentReceipt] = useState<File | null>(null);
 
   useEffect(() => {
     const getStatus = async () => {
@@ -36,7 +40,7 @@ const CartOrderConfirmCard = ({
       setMembership(error != null);
     };
     getStatus();
-  });
+  }, [order.shops.id]);
 
   const merch = order.merchandises;
   const selectedVariant = merch.variants.findIndex(
@@ -46,7 +50,13 @@ const CartOrderConfirmCard = ({
   const getPrice = (discount: boolean, quantity?: number) => {
     const variant = merch.variants[selectedVariant];
     const price = discount ? variant.membership_price : variant.original_price;
-    return `₱${(price * (quantity || order.quantity)).toFixed(2)}`;
+    const displayPrice = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "PHP",
+      maximumFractionDigits: 0,
+      minimumFractionDigits: 0,
+    }).format(price * (quantity || order.quantity));
+    return displayPrice;
   };
 
   return (
@@ -87,9 +97,13 @@ const CartOrderConfirmCard = ({
             <label className="inline-flex items-center">
               <input
                 type="radio"
-                value=""
+                name={`payment-${order.id}`}
+                value="irl"
                 checked={paymentOption === "irl"}
-                onChange={() => setPaymentOption("irl")}
+                onChange={() => {
+                  setPaymentOption("irl");
+                  paymentUpdate(order.id.toString(), "irl", paymentReceipt);
+                }}
                 className="mr-2"
               />
               <span>In-Person Payment</span>
@@ -100,41 +114,44 @@ const CartOrderConfirmCard = ({
             <label className="inline-flex items-center">
               <input
                 type="radio"
-                value=""
+                name={`payment-${order.id}`}
+                value="online"
                 checked={paymentOption === "online"}
-                onChange={() => setPaymentOption("online")}
+                onChange={() => {
+                  setPaymentOption("online");
+                  paymentUpdate(order.id.toString(), "online", paymentReceipt);
+                }}
                 className="mr-2"
               />
               <span>GCash Payment</span>
             </label>
           )}
 
-          {paymentOption == "online" && (
+          {paymentOption === "online" && (
             <div className="space-y-2">
-              <Label htmlFor="gcash-receipt" className="font-semibold">
+              <Label
+                htmlFor={`gcash-receipt-${order.id}`}
+                className="font-semibold"
+              >
                 GCash Receipt
               </Label>
               <Input
-                id="gcash-receipt"
+                id={`gcash-receipt-${order.id}`}
                 type="file"
-                onChange={(e) => setPaymentReceipt(e.target.files?.[0] || null)}
+                onChange={(e) => {
+                  setPaymentReceipt(e.target.files?.[0] || null);
+                  paymentUpdate(
+                    order.id.toString(),
+                    paymentOption,
+                    e.target.files?.[0],
+                  );
+                }}
                 accept="image/*"
                 required
               />
             </div>
           )}
         </div>
-
-        <Button
-          onClick={handleOrderSubmit}
-          disabled={
-            paymentOption == "none" ||
-            (paymentOption == "online" && paymentReceipt == null)
-          }
-          className="w-full"
-        >
-          Confirm Purchase
-        </Button>
       </DialogHeader>
     </div>
   );
