@@ -156,3 +156,16 @@ export type CartOrder = {
     logo_url: string;
   };
 };
+
+export type ShopManagementType = {
+  id: number;
+  name: string;
+  email: string;
+  socmed_url: string;
+  logo_url: string;
+  colleges: {
+    id: string;
+    name: string;
+  };
+  acronym: string;
+};

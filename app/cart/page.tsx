@@ -73,8 +73,6 @@ const Cart = () => {
       ...prev,
       [orderId]: { paymentOption, paymentReceipt },
     }));
-    console.log("dwad");
-    // Additional logic for processing the order
   };
 
   const submitOrder = (

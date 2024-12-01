@@ -1,7 +1,7 @@
 import React, { use } from "react";
 import { createServerClient } from "@/supabase/clients/createServer";
 import { FullMerch } from "@/constants/type";
-import FullMerchDisplay from "@/components/merch-display";
+import FullMerchDisplay from "@/components/merch-find-display";
 
 const MerchandisePage = async ({ params }: { params: { merchId: string } }) => {
   const merchId = params.merchId;

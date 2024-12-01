@@ -62,7 +62,6 @@ const CollegeProgramInput = ({
             setSelectedProgram(filtered[0].id.toString());
             setFilteredPrograms(filtered);
             setSelectedCollege(val);
-            console.log(filtered);
           }}
           required
         >

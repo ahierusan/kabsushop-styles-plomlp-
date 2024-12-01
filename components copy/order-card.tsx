@@ -41,7 +41,6 @@ const OrderCard = ({ order }: { order: Order }) => {
   // Determine which price to show based on whether sizes exists
   const originalPrice =
     order.sizes?.original_price ?? order.variants.original_price;
-  console.log(order.sizes?.original_price ?? order.variants.original_price);
   const displayPrice = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "PHP",

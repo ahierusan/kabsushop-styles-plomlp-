@@ -114,7 +114,6 @@ const SearchPage = () => {
         .eq("id", shopId)
         .returns<FullShopInfo>()
         .single();
-      console.log(error);
       setShop(data);
     };
     getShops();
@@ -149,7 +148,7 @@ const SearchPage = () => {
     queryParams.set("category", updatedSelected.join(",")); // Set the 'category' param to the selected IDs
     router.push(`/shop/${shopId}?${queryParams.toString()}`); // Update the URL without reloading
   };
-  console.log(shop);
+
   return (
     <div className="flex justify-center">
       <div className="flex px-28 text-sm">

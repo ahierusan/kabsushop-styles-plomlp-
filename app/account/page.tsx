@@ -18,7 +18,9 @@ const UserPage = () => {
         <div className="mb-2 flex justify-center">
           <TabsList>
             <TabsTrigger value="profile">Profile Information</TabsTrigger>
-            <TabsTrigger value="membership">Membership Request</TabsTrigger>
+            <TabsTrigger value="membership">
+              Membership Verification
+            </TabsTrigger>
             <TabsTrigger value="shops">Manage Shops</TabsTrigger>
             <TabsTrigger value="orders">View Orders</TabsTrigger>
           </TabsList>

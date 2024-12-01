@@ -62,7 +62,6 @@ const OrderCard = async ({ order }: { order: Order }) => {
   };
 
   const status = getOrderStatus();
-  console.log(order);
   return (
     <div>
       <Card className="w-full max-w-md">

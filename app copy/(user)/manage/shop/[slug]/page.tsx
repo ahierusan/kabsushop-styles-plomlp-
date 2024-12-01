@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { deleteMerch } from "./actions";
+import { deleteMerch } from "../../../../../app/manage/shop/[shopId]/actions";
 import {
   Card,
   CardContent,
@@ -55,7 +55,7 @@ type Merch = {
   };
 };
 
-const ShopManagement = async ({ params }: PostProps) => {
+const ShopManagement = async ({ params }: { params: { shopId: number } }) => {
   const supabase = createServerComponentClient({ cookies });
   const { data: shop } = await supabase
     .from("shops")
