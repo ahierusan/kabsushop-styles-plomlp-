@@ -169,3 +169,26 @@ export type ShopManagementType = {
   };
   acronym: string;
 };
+
+export type FetchedMerch = {
+  id: number;
+  name: string;
+  description: string;
+  receiving_information: string;
+  variant_name: string;
+  online_payment: boolean;
+  physical_payment: boolean;
+  cancellable: boolean;
+  merchandise_pictures: {
+    picture_url: string;
+  }[];
+  variants: {
+    picture_url: string;
+    name: string;
+    original_price: number;
+    membership_price: number;
+  }[];
+  merchandise_categories: {
+    cat_id: number;
+  };
+};
